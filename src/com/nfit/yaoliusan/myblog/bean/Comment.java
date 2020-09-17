@@ -7,13 +7,22 @@ public class Comment {
     private String content;
     private String author;
     private Date created;
-
+    private int row;
     private Post post;
+
+    public Comment() {
+    }
+
+    public Comment(String content, String author, Post post) {
+        this.content = content;
+        this.author = author;
+        this.post = post;
+    }
 
     public int getId() {
         return id;
     }
-
+    
     public void setId(int id) {
         this.id = id;
     }
@@ -48,5 +57,13 @@ public class Comment {
 
     public void setPost(Post post) {
         this.post = post;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public void setRow(int row) {
+        this.row = row;
     }
 }

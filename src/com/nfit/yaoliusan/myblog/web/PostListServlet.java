@@ -16,5 +16,13 @@ import java.util.List;
 public class PostListServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        PostDAO dao = new PostDAO();
+        try {
+            List<Post> posts = dao.getAll();
+            req.setAttribute("posts", posts);
+            req.getRequestDispatcher("/jsp/posts.jsp").forward(req, resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

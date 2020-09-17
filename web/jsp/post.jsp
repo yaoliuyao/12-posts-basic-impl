@@ -19,11 +19,24 @@
     <section class="comments">
         <c:forEach items="${comments}" var="comment">
             <%-- 渲染评论列表 --%>
+                <div>
+                    TOP${comment.row}：${comment.author}
+                </div>
+                <div>
+                    <p>
+                            ${comment.content}
+                    </p>
+                </div>
+                <div id="time">
+                <span id="timeP">
+                        ${comment.created}
+                </span>
+                </div>
         </c:forEach>
     </section>
 
     <section class="comment_form">
-        <form>
+        <form method="post" action="${pageContext.request.contextPath}/comment/add">
             <label>
                 <span>姓名</span>
                 <input name="author">
