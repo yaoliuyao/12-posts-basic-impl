@@ -15,21 +15,24 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 @WebServlet("/comment/add")
-public class CommentServlet extends HttpServlet {
+public class CommentAddServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String postId = req.getParameter("postid");
         String author = req.getParameter("author");
         String content = req.getParameter("content");
-        HttpSession session = req.getSession();
-        Post post = (Post) session.getAttribute("post");
-        CommentDAO dao = new CommentDAO();
         try {
-            dao.addComment(new Comment(content, author, post));
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            Post post = new Post();
+            post.setId(Long.parseLong(postId));
+            new CommentDAO().addComment(new Comment(content, author, post));
+            // 返回页面:
+            // resp.sendRedirect();
+            // req.getRequestDispatcher().forward();
+            resp.sendRedirect(req.getContextPath() + "/post?id=" + postId);
         } catch (Exception e) {
             e.printStackTrace();
+            req.setAttribute("error", e.getLocalizedMessage());
+            req.getRequestDispatcher("/jsp/error.jsp").forward(req, resp);
         }
-        resp.sendRedirect(req.getContextPath() + "/post");
     }
 }

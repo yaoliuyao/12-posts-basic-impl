@@ -6,7 +6,9 @@ import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.List;
 
@@ -15,60 +17,56 @@ public class PostDAO {
     /**
      * 获取所有文章
      *
-     * @return
-     * @throws Exception
+     * @return 所有的 Posts
+     * @throws Exception 所有异常
      */
-    public List<Post> getAll() throws Exception {
-        String sql = "select id, title, content, author, created from post order by created Desc";
-        QueryRunner run = new QueryRunner();
+    public List<Post> getAllPosts() throws Exception {
         Connection conn = DBHelper.getConnection();
-        List<Post> postList;
+        String sql = "select id, title, content, author, created from post order by created Desc";
         try {
-            postList = run.query(
+            return new QueryRunner().query(
                     conn, sql, new BeanListHandler<Post>(Post.class));
         } finally {
             DbUtils.closeQuietly(conn);
         }
-        return postList;
     }
 
     /**
-     * 根据PostId获取文章
+     * 根据 PostId 获取文章
      *
-     * @param id
-     * @return
-     * @throws Exception
+     * @param id Post 的主键
+     * @return 某篇 Post
      */
     public Post getPostById(int id) throws Exception {
-        String sql = "select id, title, content, author, created from post where id = ?";
-        QueryRunner run = new QueryRunner();
         Connection conn = DBHelper.getConnection();
-        Post post;
+        String sql = "select id, title, content, author, created from post where id = ?";
         try {
-            post = run.query(
-                    conn, sql, new BeanHandler<Post>(Post.class), id);
+            return new QueryRunner().query(
+                     conn, sql, new BeanHandler<Post>(Post.class), id);
         } finally {
             DbUtils.closeQuietly(conn);
         }
-        return post;
     }
 
     /**
      * 添加文章
      *
-     * @param post
-     * @return
+     * @param post 要插入的文章
+     * @return 带 Id 的文章
      */
-    public int addPost(Post post) throws Exception {
-        String sql = "insert into post(title, content, author) values (?, ?, ?)";
+    public Post addPost(Post post) throws Exception {
         Connection conn = DBHelper.getConnection();
-        QueryRunner run = new QueryRunner();
-        Object[] objects = {
+        String sql = "insert into post (title, content, author) values (?, ?, ?)";
+        Object[] params = {
                 post.getTitle(), post.getContent(), post.getAuthor()
         };
-        int count = run.update(conn, sql, objects);
-        DbUtils.closeQuietly(conn);
-        return  count;
+        try {
+            QueryRunner run = new QueryRunner();
+            BigDecimal res = run.insert(conn, sql, new ScalarHandler<BigDecimal>(), params);
+            post.setId(res.longValue());
+            return post;
+        } finally {
+            DbUtils.closeQuietly(conn);
+        }
     }
-
 }

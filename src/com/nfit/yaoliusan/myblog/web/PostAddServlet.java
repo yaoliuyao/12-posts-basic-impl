@@ -14,15 +14,18 @@ import java.io.IOException;
 public class PostAddServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        PostDAO dao = new PostDAO();
         String author = req.getParameter("author");
         String title = req.getParameter("title");
         String content = req.getParameter("content");
         try {
-            dao.addPost(new Post(title, content, author));
-            resp.sendRedirect(req.getContextPath() + "/posts");
+            PostDAO postDAO = new PostDAO();
+            Post post = postDAO.addPost(new Post(title, content, author));
+            // 跳转到详情页面更合理
+            resp.sendRedirect(req.getContextPath() + "/post?id=" + post.getId());
         } catch (Exception e) {
             e.printStackTrace();
+            req.setAttribute("error", e.getLocalizedMessage());
+            req.getRequestDispatcher("/jsp/error.jsp").forward(req, resp);
         }
     }
 }

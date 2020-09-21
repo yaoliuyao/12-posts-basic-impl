@@ -15,22 +15,27 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
+
 @WebServlet("/post")
 public class PostServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession();
-        int id = req.getParameter("id") == null ? (int) ((Post) session.getAttribute("post")).getId() : Integer.parseInt(req.getParameter("id"));
-        PostDAO dao = new PostDAO();
-        CommentDAO dao1 = new CommentDAO();
+        int id = Integer.parseInt(req.getParameter("id"));
         try {
-            Post post = dao.getPostById(id);
-            session.setAttribute("post", post);
-            List<Comment> commentList = dao1.getCommentById(post.getId());
-            req.setAttribute("comments", commentList);
+            PostDAO postDAO = new PostDAO();
+            CommentDAO commentDAO = new CommentDAO();
+
+            Post post = postDAO.getPostById(id);
+            List<Comment> comments = commentDAO.getCommentsByPostId(id);
+
+            req.setAttribute("post", post);
+            req.setAttribute("comments", comments);
+
+            req.getRequestDispatcher("/jsp/post.jsp").forward(req, resp);
         } catch (Exception e) {
             e.printStackTrace();
+            req.setAttribute("error", e.getLocalizedMessage());
+            req.getRequestDispatcher("/jsp/error.jsp").forward(req, resp);
         }
-        req.getRequestDispatcher("/jsp/post.jsp").forward(req, resp);
     }
 }

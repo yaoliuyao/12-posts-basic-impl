@@ -3,11 +3,10 @@ package com.nfit.yaoliusan.myblog.bean;
 import java.util.Date;
 
 public class Comment {
-    private int id;
+    private Long id;
     private String content;
     private String author;
     private Date created;
-    private int row;
     private Post post;
 
     public Comment() {
@@ -19,11 +18,11 @@ public class Comment {
         this.post = post;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
-    
-    public void setId(int id) {
+
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -57,13 +56,5 @@ public class Comment {
 
     public void setPost(Post post) {
         this.post = post;
-    }
-
-    public int getRow() {
-        return row;
-    }
-
-    public void setRow(int row) {
-        this.row = row;
     }
 }

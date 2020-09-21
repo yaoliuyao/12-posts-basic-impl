@@ -5,7 +5,9 @@ import com.nfit.yaoliusan.myblog.utils.DBHelper;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.List;
 
@@ -13,38 +15,41 @@ public class CommentDAO {
     /**
      * 获取所有评论
      *
-     * @return
-     * @throws Exception
+     * @return 所有的评论列表
      */
-    public List<Comment> getCommentById(int id) throws Exception {
-        String sql = "select row_number( ) over(partition by postid order by id) row, id, content, author, created from comment where postid  = ? order by created desc";
-        QueryRunner run = new QueryRunner();
+    public List<Comment> getCommentsByPostId(int id) throws Exception {
         Connection conn = DBHelper.getConnection();
-        List<Comment> commentList;
+        String sql = "select id, content, author, created from comment where postid  = ? order by created desc";
         try {
-            commentList = run.query(
+            return new QueryRunner().query(
                     conn, sql, new BeanListHandler<Comment>(Comment.class), id);
         } finally {
             DbUtils.closeQuietly(conn);
         }
-        return commentList;
     }
 
     /**
      * 添加评论
      *
-     * @param comment
-     * @return
+     * @param comment 要插入的对象
+     * @return 返回一个带主键的 Comment 对象
      */
-    public int addComment(Comment comment) throws Exception {
-        String sql = "insert into comment(postid , author, content) values(?, ?, ?)";
-        QueryRunner run = new QueryRunner();
+    public Comment addComment(Comment comment) throws Exception {
         Connection conn = DBHelper.getConnection();
-        Object[] objects = {
+        String sql = "insert into comment(postid , author, content) values(?, ?, ?)";
+        Object[] params = {
                 comment.getPost().getId(), comment.getAuthor(), comment.getContent()
         };
-        int count = run.update(conn, sql, objects);
-        DbUtils.closeQuietly(conn);
-        return count;
+        try {
+            // 添加的第三个参数，表名需要返回一个 Long 类型的主键
+            // 所以，它返回的就是主键
+            BigDecimal res = new QueryRunner().insert(conn, sql, new ScalarHandler<BigDecimal>(), params);
+            comment.setId(res.longValue());
+            return comment;
+        } finally {
+            // 千万不要忘记关闭
+            // 要放到 finally 里，因为 finally 的语句不管有没有异常都会被执行
+            DbUtils.closeQuietly(conn);
+        }
     }
 }
